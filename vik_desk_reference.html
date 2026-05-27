@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vik's Trading Rules — Print & Paste</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0d0d0d;
+    --white: #f5f3ee;
+    --red: #c0392b;
+    --red-light: #fdf0ef;
+    --green: #1a6b3c;
+    --green-light: #edf7f1;
+    --amber: #b45309;
+    --amber-light: #fef3e0;
+    --rule: #d4cfc6;
+    --muted: #7a746a;
+    --display: 'Bebas Neue', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --body: 'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    background: var(--white);
+    color: var(--black);
+    font-family: var(--body);
+    padding: 2.5rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Print styles */
+  @media print {
+    body { padding: 0.5cm; max-width: 100%; font-size: 11px; }
+    .no-print { display: none; }
+    .page-break { page-break-after: always; }
+    .dos-donts-grid { page-break-inside: avoid; }
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 3px solid var(--black);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .header-left h1 {
+    font-family: var(--display);
+    font-size: 52px;
+    letter-spacing: 2px;
+    line-height: 1;
+    color: var(--black);
+  }
+
+  .header-left .subtitle {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .header-right {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .header-right .stat {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  /* Data banner */
+  .data-banner {
+    background: var(--black);
+    color: var(--white);
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .data-banner span { color: #aaa; }
+  .data-banner strong { color: var(--white); }
+  .data-banner .loss { color: #e74c3c; }
+  .data-banner .win { color: #2ecc71; }
+
+  /* Main dos/donts grid */
+  .dos-donts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .column-header {
+    font-family: var(--display);
+    font-size: 36px;
+    letter-spacing: 2px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid;
+    margin-bottom: 12px;
+  }
+
+  .donts .column-header { color: var(--red); border-color: var(--red); }
+  .dos .column-header { color: var(--green); border-color: var(--green); }
+
+  .rule-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: flex-start;
+  }
+
+  .rule-item:last-child { border-bottom: none; }
+
+  .rule-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 22px;
+    padding-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .donts .rule-num { color: var(--red); }
+  .dos .rule-num { color: var(--green); }
+
+  .rule-content { flex: 1; }
+
+  .rule-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--black);
+    line-height: 1.3;
+    margin-bottom: 3px;
+  }
+
+  .rule-data {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .rule-data .cost { color: var(--red); font-weight: 600; }
+  .rule-data .benefit { color: var(--green); font-weight: 600; }
+
+  /* Hard numbers section */
+  .numbers-section {
+    border: 2px solid var(--black);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .numbers-title {
+    font-family: var(--display);
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .numbers-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .number-box {
+    background: var(--black);
+    color: var(--white);
+    padding: 10px 12px;
+    text-align: center;
+  }
+
+  .number-box .num {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 1px;
+    display: block;
+    line-height: 1;
+  }
+
+  .number-box .num.red { color: #e74c3c; }
+  .number-box .num.green { color: #2ecc71; }
+  .number-box .label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* Pre-trade checklist */
+  .checklist-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 2px;
+    border-bottom: 2px solid var(--black);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    background: #fff;
+  }
+
+  .checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--black);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .check-text {
+    font-size: 13px;
+    color: var(--black);
+    line-height: 1.4;
+  }
+
+  .check-text .sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Time schedule */
+  .schedule-section { margin-bottom: 2rem; }
+
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  .time-block {
+    padding: 8px 6px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .time-block .time { font-weight: 700; display: block; font-size: 12px; }
+  .time-block .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-top: 2px; }
+
+  .time-green { background: var(--green-light); border: 1px solid var(--green); color: var(--green); }
+  .time-amber { background: var(--amber-light); border: 1px solid var(--amber); color: var(--amber); }
+  .time-red { background: var(--red-light); border: 1px solid var(--red); color: var(--red); }
+  .time-black { background: var(--black); border: 1px solid var(--black); color: var(--white); }
+
+  /* Big warning box */
+  .warning-box {
+    background: var(--red);
+    color: var(--white);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .warning-box h2 {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .warning-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .warning-list li {
+    font-family: var(--mono);
+    font-size: 12px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .warning-list li::before { content: '▶'; font-size: 8px; opacity: 0.7; }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Print button */
+  .print-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--black);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .print-btn:hover { background: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <h1>VIK'S TRADING RULES</h1>
+    <div class="subtitle">Short-side momentum · Low float · Parabolic fade · Print & paste on desk</div>
+  </div>
+  <div class="header-right">
+    <div>Data source: <span class="stat">9,118 real trades</span></div>
+    <div>Period: <span class="stat">Dec 2024 – May 2026</span></div>
+    <div>These rules are backed by <span class="stat">your actual numbers</span></div>
+  </div>
+</div>
+
+<!-- Data banner -->
+<div class="data-banner">
+  <div><span>Total P&L</span> <strong class="loss">-$60,632</strong></div>
+  <div><span>Win rate</span> <strong>61.5%</strong></div>
+  <div><span>Avg win day</span> <strong class="win">+$4,375</strong></div>
+  <div><span>Avg loss day</span> <strong class="loss">-$7,585</strong></div>
+  <div><span>Worst day</span> <strong class="loss">-$44,384</strong></div>
+  <div><span>Profit factor</span> <strong class="loss">0.92</strong> (need &gt;1.0)</div>
+  <div><span>Afternoon losses</span> <strong class="loss">-$1.3M cumulative</strong></div>
+</div>
+
+<!-- Dos and Don'ts -->
+<div class="dos-donts-grid">
+
+  <!-- DON'TS -->
+  <div class="donts">
+    <div class="column-header">DON'TS</div>
+
+    <div class="rule-item">
+      <span class="rule-num">D01</span>
+      <div class="rule-content">
+        <div class="rule-title">No hard stop = no trade</div>
+        <div class="rule-data">BMNR cost <span class="cost">-$38,453</span> · ALUR cost <span class="cost">-$53,918</span> · both had no stop</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D02</span>
+      <div class="rule-content">
+        <div class="rule-title">Never trade after 2:00 PM</div>
+        <div class="rule-data">Afternoon (3pm–7pm) destroyed <span class="cost">$1,301,905</span> across your history</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D03</span>
+      <div class="rule-content">
+        <div class="rule-title">Never trade the day after a big loss</div>
+        <div class="rule-data">27 times a big losing day led to another losing day — revenge trading pattern confirmed in data</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D04</span>
+      <div class="rule-content">
+        <div class="rule-title">Never exceed $3,000 daily loss</div>
+        <div class="rule-data">21 days with &gt;$10K loss = <span class="cost">$414,824</span> — 54% of all your losses. Hit $3K, walk away.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D05</span>
+      <div class="rule-content">
+        <div class="rule-title">Never short a stock with market cap under $5M</div>
+        <div class="rule-data">WOK: $292K market cap, went from $1.40 to $10.00 before crashing. Sub-$5M = untradeable.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D06</span>
+      <div class="rule-content">
+        <div class="rule-title">Never short without checking borrow first (IBKR)</div>
+        <div class="rule-data">Missed BIRD, AEHL, AKAN, SOBR — all unavailable on TOS, available on IBKR</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D07</span>
+      <div class="rule-content">
+        <div class="rule-title">Never average into a losing short</div>
+        <div class="rule-data">Adding to BMNR and ALUR as they moved against the position turned manageable losses into blow-ups</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D08</span>
+      <div class="rule-content">
+        <div class="rule-title">Never short a real catalyst</div>
+        <div class="rule-data">Real earnings, FDA approvals, $30M+ contracts, AMD/Nvidia partnerships. RCT, RECT, MOBX — all avoided correctly</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D09</span>
+      <div class="rule-content">
+        <div class="rule-title">Never chase — no entry into new highs</div>
+        <div class="rule-data">Wait for HOD rejection + red candle + lower high. Chasing = entering at the worst price</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D10</span>
+      <div class="rule-content">
+        <div class="rule-title">Never hold micro-cap shorts overnight</div>
+        <div class="rule-data">After-hours on these names is unpredictable. High borrow rate eats P&L. Cover by 3:30 PM always.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DOS -->
+  <div class="dos">
+    <div class="column-header">DO'S</div>
+
+    <div class="rule-item">
+      <span class="rule-num">D01</span>
+      <div class="rule-content">
+        <div class="rule-title">Set stop immediately on every fill</div>
+        <div class="rule-data">Stop = HOD + 10–15%. First action after fill. Before checking anything else.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D02</span>
+      <div class="rule-content">
+        <div class="rule-title">Trade only 9:30 AM – 2:00 PM</div>
+        <div class="rule-data">Your edge is in the morning. <span class="benefit">9am–2pm is profitable</span>. Protect it by stopping at 2.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D03</span>
+      <div class="rule-content">
+        <div class="rule-title">Take the day off after a $3K+ loss day</div>
+        <div class="rule-data">Mandatory 24-hour pause prevents the revenge trading spirals your data shows clearly</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D04</span>
+      <div class="rule-content">
+        <div class="rule-title">Max 200–500 shares per trade</div>
+        <div class="rule-data">Size based on max $150 loss. 500 shares × $0.30 stop = $150 max loss. No bigger.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D05</span>
+      <div class="rule-content">
+        <div class="rule-title">Only short weak or no catalysts</div>
+        <div class="rule-data">Bitcoin gains, name change, S-8 filing, vague MOU, reverse split. Run Catalyst Analyzer first.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D06</span>
+      <div class="rule-content">
+        <div class="rule-title">Check IBKR borrow before every trade</div>
+        <div class="rule-data">Not TOS. IBKR has the inventory. Confirm rate. Under 50% APR = free trade. Over 300% = skip.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D07</span>
+      <div class="rule-content">
+        <div class="rule-title">Wait for HOD rejection before entering</div>
+        <div class="rule-data">Two failed HOD tests + red candle + drying volume = entry. Patience beats speed every time.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D08</span>
+      <div class="rule-content">
+        <div class="rule-title">Watch more than you trade</div>
+        <div class="rule-data">Best sessions = 0–1 trades. Passing on setups that don't fully qualify is a skill, not weakness.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D09</span>
+      <div class="rule-content">
+        <div class="rule-title">Cover all shorts by 3:30 PM</div>
+        <div class="rule-data">Hard close. No exceptions. After-hours gaps on low float names are random and unhedgeable.</div>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">D10</span>
+      <div class="rule-content">
+        <div class="rule-title">Use IBKR for execution, TOS for scanning</div>
+        <div class="rule-data">TOS scanners + Catalyst Analyzer surfaces the ticker. IBKR executes the short. Two platforms, one workflow.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Hard numbers -->
+<div class="numbers-section">
+  <div class="numbers-title">THE NUMBERS THAT MATTER</div>
+  <div class="numbers-grid">
+    <div class="number-box">
+      <span class="num red">-$60K</span>
+      <span class="label">Total loss despite 61% win rate</span>
+    </div>
+    <div class="number-box">
+      <span class="num red">1.73×</span>
+      <span class="label">Your losses vs your wins ratio</span>
+    </div>
+    <div class="number-box">
+      <span class="num red">54%</span>
+      <span class="label">Of losses from just 21 days (&gt;$10K)</span>
+    </div>
+    <div class="number-box">
+      <span class="num green">$3K</span>
+      <span class="label">Daily stop that makes you profitable</span>
+    </div>
+    <div class="number-box">
+      <span class="num red">$1.3M</span>
+      <span class="label">Lost in afternoon session (3–7pm)</span>
+    </div>
+    <div class="number-box">
+      <span class="num green">2 PM</span>
+      <span class="label">Hard stop time — no new trades after</span>
+    </div>
+    <div class="number-box">
+      <span class="num red">$92K</span>
+      <span class="label">Lost on BMNR + ALUR alone (no stops)</span>
+    </div>
+    <div class="number-box">
+      <span class="num green">61.5%</span>
+      <span class="label">Win rate — your edge is real, protect it</span>
+    </div>
+  </div>
+</div>
+
+<!-- Trading schedule -->
+<div class="schedule-section">
+  <div class="section-title">DAILY TRADING SCHEDULE</div>
+  <div class="schedule-grid">
+    <div class="time-block time-black">
+      <span class="time">8:00 AM</span>
+      <span class="label">Premarket scan + watchlist</span>
+    </div>
+    <div class="time-block time-green">
+      <span class="time">9:30 AM</span>
+      <span class="label">Open — watch first 15 min</span>
+    </div>
+    <div class="time-block time-green">
+      <span class="time">9:45 AM</span>
+      <span class="label">Prime window — trade</span>
+    </div>
+    <div class="time-block time-green">
+      <span class="time">11:30 AM</span>
+      <span class="label">Lunch lull — only A setups</span>
+    </div>
+    <div class="time-block time-amber">
+      <span class="time">2:00 PM</span>
+      <span class="label">HARD STOP — no new trades</span>
+    </div>
+    <div class="time-block time-red">
+      <span class="time">3:30 PM</span>
+      <span class="label">Cover all positions — done</span>
+    </div>
+  </div>
+</div>
+
+<!-- Pre-trade checklist -->
+<div class="checklist-section">
+  <div class="section-title">PRE-TRADE CHECKLIST — ALL MUST BE YES</div>
+  <div class="checklist-grid">
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">Catalyst is WEAK or NONE
+        <span class="sub">Not earnings, FDA, or major contract</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">Borrow confirmed on IBKR
+        <span class="sub">Rate under 150% APR for intraday</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">Market cap above $5M
+        <span class="sub">Sub-$5M = never short (WOK lesson)</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">Short interest under 20% of float
+        <span class="sub">High SI = squeeze risk = skip it</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">HOD rejection confirmed
+        <span class="sub">Red candle below HOD + lower high</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">Stop level identified
+        <span class="sub">HOD + 10–15%. Set IMMEDIATELY on fill.</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">Time is before 2:00 PM
+        <span class="sub">After 2pm = afternoon graveyard</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">No big loss yesterday
+        <span class="sub">Yesterday &gt;$3K loss = no trading today</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">Position size = max $150 loss
+        <span class="sub">Max Loss ÷ Stop Distance = Share count</span>
+      </div>
+    </div>
+    <div class="check-item">
+      <div class="checkbox"></div>
+      <div class="check-text">I am calm — not trying to make back losses
+        <span class="sub">If answer is "both" = no trade today</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Warning box -->
+<div class="warning-box">
+  <h2>THE 3 TRADES THAT DEFINE YOUR HISTORY</h2>
+  <ul class="warning-list">
+    <li>BMNR: Shorted $5–$14, ran to $128, covered 300 shares at $128.11 = -$38,453. No stop.</li>
+    <li>ALUR: Shorted premarket, squeezed, covered 3,000 shares at $17.97 = -$53,918. No stop.</li>
+    <li>WOK: Shorted $1.40, squeezed to $10, big loss. Sub-$5M market cap. No hard stop honored.</li>
+    <li>Common thread: All three had no hard stop. All three were avoidable. All three are the same mistake.</li>
+  </ul>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <span>Built from 9,118 real trades · Dec 2024 – May 2026 · These numbers are YOURS not generic advice</span>
+  <span>Updated May 2026 · Short-side momentum · Low float</span>
+</div>
+
+<button class="print-btn no-print" onclick="window.print()">🖨 PRINT THIS</button>
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vik's Short-Side Trading Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0c0f; --surface: #111418; --surface2: #181c22;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0; --muted: #6b7280; --accent: #00d4aa;
+    --red: #ff4757; --red-dim: rgba(255,71,87,0.1);
+    --amber: #ffa502; --amber-dim: rgba(255,165,2,0.1);
+    --green: #00d4aa; --green-dim: rgba(0,212,170,0.1);
+    --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.1);
+    --mono: 'JetBrains Mono', monospace; --sans: 'DM Sans', sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); padding: 2rem 1rem; font-size: 15px; line-height: 1.6; }
+  .container { max-width: 860px; margin: 0 auto; }
+
+  header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid var(--border); }
+  .header-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+  .logo { width: 40px; height: 40px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  h1 { font-size: 22px; font-weight: 600; }
+  .tagline { font-size: 13px; color: var(--muted); font-family: var(--mono); }
+
+  .toc { background: var(--surface); border: 0.5px solid var(--border2); border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; }
+  .toc-title { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .toc-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px; }
+  .toc-list li a { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 6px; text-decoration: none; font-size: 13px; color: var(--muted); transition: color 0.15s, border-color 0.15s; }
+  .toc-list li a:hover { color: var(--text); border-color: var(--accent); }
+  .toc-num { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 700; }
+
+  .section-divider { display: flex; align-items: center; gap: 12px; margin: 2.5rem 0 1.25rem; }
+  .section-divider span { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .card-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px; }
+  .card-title .num { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .card-body { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .card-body p { margin-bottom: 10px; }
+  .card-body p:last-child { margin-bottom: 0; }
+
+  .rule-list { list-style: none; margin-top: 10px; }
+  .rule-list li { font-size: 14px; color: var(--muted); padding: 8px 0; border-bottom: 0.5px solid var(--border); display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+  .rule-list li:last-child { border-bottom: none; }
+  .rule-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .checklist { list-style: none; margin-top: 10px; }
+  .checklist li { font-size: 14px; color: var(--muted); padding: 6px 0 6px 28px; position: relative; line-height: 1.5; border-bottom: 0.5px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '☐'; position: absolute; left: 0; font-size: 14px; color: var(--accent); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+
+  .mini-card { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; }
+  .mini-card-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .mini-card-value { font-size: 14px; font-weight: 600; color: var(--text); }
+  .mini-card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+  .badge { font-size: 10px; font-family: var(--mono); font-weight: 700; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; }
+  .badge-red { background: var(--red-dim); color: var(--red); border: 0.5px solid rgba(255,71,87,0.3); }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(0,212,170,0.3); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); border: 0.5px solid rgba(255,165,2,0.3); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 0.5px solid rgba(59,130,246,0.3); }
+
+  .ticker-example { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .ticker-example strong { color: var(--text); font-family: var(--mono); }
+
+  .warning-box { background: rgba(255,71,87,0.06); border: 0.5px solid rgba(255,71,87,0.25); border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+  .warning-title { font-size: 11px; font-family: var(--mono); color: var(--red); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .warning-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .lesson-box { background: rgba(255,165,2,0.06); border: 0.5px solid rgba(255,165,2,0.25); border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+  .lesson-title { font-size: 11px; font-family: var(--mono); color: var(--amber); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+  .scenario-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .scenario { flex: 1; min-width: 180px; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .scenario-label { font-size: 10px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .scenario-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+  th { background: var(--surface2); color: var(--muted); font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; text-align: left; border-bottom: 0.5px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 0.5px solid var(--border); color: var(--muted); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--text); font-family: var(--mono); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <div class="logo">VIK</div>
+    <div>
+      <h1>Short-Side Trading Playbook</h1>
+      <div class="tagline">low float · parabolic fade · momentum short · updated May 2026</div>
+    </div>
+  </div>
+</header>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ul class="toc-list">
+    <li><a href="#profile"><span class="toc-num">01</span> Trading Profile</a></li>
+    <li><a href="#setup"><span class="toc-num">02</span> The Ideal Setup</a></li>
+    <li><a href="#catalyst"><span class="toc-num">03</span> Catalyst Scoring Guide</a></li>
+    <li><a href="#pretrade"><span class="toc-num">04</span> Pre-Trade Checklist</a></li>
+    <li><a href="#entry"><span class="toc-num">05</span> Entry Rules</a></li>
+    <li><a href="#sizing"><span class="toc-num">06</span> Position Sizing</a></li>
+    <li><a href="#stop"><span class="toc-num">07</span> Stop Loss Rules</a></li>
+    <li><a href="#exit"><span class="toc-num">08</span> Exit Rules & Targets</a></li>
+    <li><a href="#halts"><span class="toc-num">09</span> Halt Management</a></li>
+    <li><a href="#avoid"><span class="toc-num">10</span> Stocks to Avoid Shorting</a></li>
+    <li><a href="#borrow"><span class="toc-num">11</span> Borrow & IBKR Guide</a></li>
+    <li><a href="#psychology"><span class="toc-num">12</span> Psychology Rules</a></li>
+    <li><a href="#lessons"><span class="toc-num">13</span> Hard Lessons Learned</a></li>
+    <li><a href="#workflow"><span class="toc-num">14</span> Daily Workflow</a></li>
+  </ul>
+</div>
+
+<!-- 01 TRADING PROFILE -->
+<div class="section-divider"><span>01 — Trading Profile</span></div>
+<div class="card" id="profile">
+  <div class="card-title"><span class="num">01</span> Who You Are as a Trader</div>
+  <div class="grid3">
+    <div class="mini-card">
+      <div class="mini-card-label">Style</div>
+      <div class="mini-card-value">Short-Side Momentum</div>
+      <div class="mini-card-sub">Fading parabolic moves on weak catalysts</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-label">Timeframe</div>
+      <div class="mini-card-value">Intraday</div>
+      <div class="mini-card-sub">Same-day entries and exits. No overnight on micro-caps.</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-label">Universe</div>
+      <div class="mini-card-value">Low Float &lt;$5</div>
+      <div class="mini-card-sub">Float under 20M, price under $5, NASDAQ/NYSE</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-label">Primary Platform</div>
+      <div class="mini-card-value">TOS + IBKR</div>
+      <div class="mini-card-sub">TOS for scanning/charting, IBKR for borrow execution</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-label">Edge</div>
+      <div class="mini-card-value">Catalyst Quality</div>
+      <div class="mini-card-sub">Distinguishing real vs fake catalysts before retail does</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-label">Strength</div>
+      <div class="mini-card-value">Patience</div>
+      <div class="mini-card-sub">Watches more than trades. Passes on unclear setups.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 02 IDEAL SETUP -->
+<div class="section-divider"><span>02 — The Ideal Setup</span></div>
+<div class="card" id="setup">
+  <div class="card-title"><span class="num">02</span> What the Perfect Short Setup Looks Like</div>
+  <ul class="rule-list">
+    <li><span class="rule-icon">✅</span><div><strong style="color:var(--text)">Weak or no catalyst</strong> — vague PR, name change, S-8 filing, $190K crypto gains, non-binding MOU, reverse split for compliance. NOT real earnings, FDA approvals, or major contracts.</div></li>
+    <li><span class="rule-icon">✅</span><div><strong style="color:var(--text)">Low float</strong> — under 10M shares ideal, under 20M acceptable. Thinner float = bigger moves but also harder to borrow.</div></li>
+    <li><span class="rule-icon">✅</span><div><strong style="color:var(--text)">Extreme relative volume</strong> — 50x+ average is ideal. 10–50x is acceptable. Under 10x = skip it.</div></li>
+    <li><span class="rule-icon">✅</span><div><strong style="color:var(--text)">Already extended</strong> — up 50–200%+ from prior close. The more extended, the better the short thesis. Wait for exhaustion, not the peak.</div></li>
+    <li><span class="rule-icon">✅</span><div><strong style="color:var(--text)">Low short interest</strong> — under 15% of float is ideal. High short interest (25%+) = squeeze risk = avoid or size very small.</div></li>
+    <li><span class="rule-icon">✅</span><div><strong style="color:var(--text)">Borrow available</strong> — confirmed on IBKR before entry. No borrow = no trade, no exceptions.</div></li>
+    <li><span class="rule-icon">✅</span><div><strong style="color:var(--text)">Showing exhaustion</strong> — rejected HOD, lower highs on 1-min, volume drying up on pushes, first red candle after multiple greens.</div></li>
+  </ul>
+  <div class="ticker-example">
+    <strong>Real examples of ideal setups:</strong> RMSG (no catalyst, 195x volume), AEHL ($190K Bitcoin gains, 406x volume), JZXN ($210K crypto gains, 1338x volume), SNYR (S-8 filing, 642x volume)
+  </div>
+</div>
+
+<!-- 03 CATALYST GUIDE -->
+<div class="section-divider"><span>03 — Catalyst Scoring Guide</span></div>
+<div class="card" id="catalyst">
+  <div class="card-title"><span class="num">03</span> Weak vs Strong Catalysts</div>
+  <table>
+    <tr><th>Catalyst Type</th><th>Rating</th><th>Short?</th><th>Examples</th></tr>
+    <tr><td>No news / mystery pump</td><td><span class="badge badge-red">Weakest</span></td><td style="color:var(--green)">Yes ✅</td><td>RMSG, WOK</td></tr>
+    <tr><td>Name change / AI pivot</td><td><span class="badge badge-red">Very Weak</span></td><td style="color:var(--green)">Yes ✅</td><td>BIRD (NewBird AI), SNAL</td></tr>
+    <tr><td>Crypto treasury / Bitcoin gains</td><td><span class="badge badge-red">Very Weak</span></td><td style="color:var(--green)">Yes ✅</td><td>AEHL ($190K), JZXN ($210K)</td></tr>
+    <tr><td>S-8 filing / share registration</td><td><span class="badge badge-red">Very Weak</span></td><td style="color:var(--green)">Yes ✅</td><td>SNYR</td></tr>
+    <tr><td>Vague partnership / non-binding MOU</td><td><span class="badge badge-red">Weak</span></td><td style="color:var(--green)">Yes ✅</td><td>FUSE (CEO letter), TDIC</td></tr>
+    <tr><td>Reverse split for compliance</td><td><span class="badge badge-red">Weak</span></td><td style="color:var(--amber)">Watch ⚠️</td><td>VEEE, AKAN</td></tr>
+    <tr><td>Small real contract (&lt;$5M)</td><td><span class="badge badge-amber">Mixed</span></td><td style="color:var(--amber)">Watch ⚠️</td><td>AHMA (MECES deal)</td></tr>
+    <tr><td>Real earnings beat</td><td><span class="badge badge-green">Strong</span></td><td style="color:var(--red)">Avoid ❌</td><td>RCT, XRX</td></tr>
+    <tr><td>Real contract ($30M+)</td><td><span class="badge badge-green">Strong</span></td><td style="color:var(--red)">Avoid ❌</td><td>RCT ($30M Saudi), RECT (AIMS)</td></tr>
+    <tr><td>FDA approval / Phase 3 data</td><td><span class="badge badge-green">Strongest</span></td><td style="color:var(--red)">Avoid ❌</td><td>Any biotech approval</td></tr>
+    <tr><td>Major tech partnership (AMD, Nvidia)</td><td><span class="badge badge-green">Strong</span></td><td style="color:var(--red)">Avoid ❌</td><td>MOBX (AMD deal), RXT</td></tr>
+    <tr><td>Macro / oil / geopolitical</td><td><span class="badge badge-blue">Macro</span></td><td style="color:var(--red)">Avoid ❌</td><td>DLXY (Hormuz), SCO</td></tr>
+  </table>
+</div>
+
+<!-- 04 PRE-TRADE CHECKLIST -->
+<div class="section-divider"><span>04 — Pre-Trade Checklist</span></div>
+<div class="card" id="pretrade">
+  <div class="card-title"><span class="num">04</span> Run This Before Every Single Entry</div>
+  <ul class="checklist">
+    <li>Catalyst identified and rated WEAK or MIXED — not strong</li>
+    <li>Float confirmed under 20M shares</li>
+    <li>Relative volume confirmed 10x+ average</li>
+    <li>Short interest confirmed under 20% of float</li>
+    <li>Borrow checked on IBKR — available at acceptable rate</li>
+    <li>Market cap above $5M — no sub-$5M market cap shorts (WOK lesson)</li>
+    <li>Stock is NOT in active halt right now</li>
+    <li>No binary catalyst upcoming (earnings today, FDA today)</li>
+    <li>Entry is at HOD rejection zone — NOT chasing a new high</li>
+    <li>Stop loss level identified and ready to set immediately on fill</li>
+    <li>Position size calculated — max loss does not exceed $150</li>
+    <li>Not trading the day after a big loss — emotional state clear</li>
+  </ul>
+</div>
+
+<!-- 05 ENTRY RULES -->
+<div class="section-divider"><span>05 — Entry Rules</span></div>
+<div class="card" id="entry">
+  <div class="card-title"><span class="num">05</span> When and How to Enter</div>
+  <ul class="rule-list">
+    <li><span class="rule-icon">📍</span><div><strong style="color:var(--text)">Wait for HOD rejection</strong> — Never short into a new high. Wait for the stock to tag HOD, show a red candle below it, then enter. The failed breakout is your signal.</div></li>
+    <li><span class="rule-icon">📍</span><div><strong style="color:var(--text)">Look for lower highs</strong> — On the 1-min chart, each push to HOD should be weaker than the last (lower volume, smaller candle range). Two failed HOD tests = strong entry signal.</div></li>
+    <li><span class="rule-icon">📍</span><div><strong style="color:var(--text)">Volume drying up</strong> — Volume should be declining on upside pushes. If volume is still surging, momentum is still with bulls — wait.</div></li>
+    <li><span class="rule-icon">📍</span><div><strong style="color:var(--text)">First red candle after green run</strong> — After 3–5 consecutive green 1-min candles, the first red close is your entry trigger. Don't wait for a second confirmation.</div></li>
+    <li><span class="rule-icon">📍</span><div><strong style="color:var(--text)">Never short during a halt</strong> — If stock is halted, wait for resume. Assess direction on the first post-halt candle before entering.</div></li>
+    <li><span class="rule-icon">📍</span><div><strong style="color:var(--text)">Never chase a fade already in progress</strong> — If the stock is already down 20%+ from HOD when you notice it, the trade has passed. Don't enter late.</div></li>
+  </ul>
+  <div class="lesson-box">
+    <div class="lesson-title">The Entry Pattern You're Looking For</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6">Stock pushes to HOD → gets rejected → pulls back → attempts HOD again on lower volume → fails to make new high → prints red candle → <strong style="color:var(--amber)">ENTER SHORT HERE</strong></div>
+  </div>
+</div>
+
+<!-- 06 POSITION SIZING -->
+<div class="section-divider"><span>06 — Position Sizing</span></div>
+<div class="card" id="sizing">
+  <div class="card-title"><span class="num">06</span> How Many Shares to Take</div>
+  <div class="card-body">
+    <p>Always size based on max dollar loss, not share count. Your max loss per trade should be <strong style="color:var(--text)">$150 or less</strong>.</p>
+  </div>
+  <div class="grid3" style="margin-top:12px">
+    <div class="mini-card">
+      <div class="mini-card-label">Formula</div>
+      <div class="mini-card-value" style="font-size:13px">Max Loss ÷ Stop Distance</div>
+      <div class="mini-card-sub">$150 ÷ $0.30 stop = 500 shares max</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-label">Market Cap Rule</div>
+      <div class="mini-card-value" style="color:var(--red)">Never short &lt;$5M</div>
+      <div class="mini-card-sub">Sub-$5M market caps can go 10x before fading (WOK)</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-label">Hard Limit</div>
+      <div class="mini-card-value">200 shares max</div>
+      <div class="mini-card-sub">For any stock under $2. No exceptions after WOK lesson.</div>
+    </div>
+  </div>
+  <table style="margin-top:14px">
+    <tr><th>Stock Price</th><th>Max Shares</th><th>Stop Distance</th><th>Max Loss</th></tr>
+    <tr><td>Under $1</td><td>200 shares</td><td>$0.30–$0.50</td><td>$60–$100</td></tr>
+    <tr><td>$1–$2</td><td>300–500 shares</td><td>$0.25–$0.40</td><td>$75–$150</td></tr>
+    <tr><td>$2–$5</td><td>200–300 shares</td><td>$0.40–$0.60</td><td>$80–$150</td></tr>
+    <tr><td>$5–$10</td><td>100–200 shares</td><td>$0.60–$1.00</td><td>$60–$150</td></tr>
+  </table>
+</div>
+
+<!-- 07 STOP LOSS -->
+<div class="section-divider"><span>07 — Stop Loss Rules</span></div>
+<div class="card" id="stop">
+  <div class="card-title"><span class="num">07</span> Stop Loss — Non-Negotiable Rules</div>
+  <ul class="rule-list">
+    <li><span class="rule-icon">🛑</span><div><strong style="color:var(--text)">Set immediately on fill</strong> — The FIRST thing you do after getting filled is set your stop. Not after checking Twitter. Not after looking at another ticker. IMMEDIATELY.</div></li>
+    <li><span class="rule-icon">🛑</span><div><strong style="color:var(--text)">Stop goes above HOD</strong> — Typically HOD + 10–15% gives it room. If HOD is $1.50, stop at $1.70–$1.75.</div></li>
+    <li><span class="rule-icon">🛑</span><div><strong style="color:var(--text)">Never move stop higher</strong> — If price approaches your stop, it means the thesis is wrong. Cover, don't move the stop.</div></li>
+    <li><span class="rule-icon">🛑</span><div><strong style="color:var(--text)">Honor the stop — no exceptions</strong> — RMSG cost ~$100. WOK cost a big loss because the stop wasn't honored. The stop exists to prevent catastrophic losses.</div></li>
+    <li><span class="rule-icon">🛑</span><div><strong style="color:var(--text)">Halt resume rule</strong> — If stock halts while you're short and resumes significantly above your stop, EXIT immediately on the first tradeable price. Don't wait for a pullback.</div></li>
+  </ul>
+  <div class="warning-box">
+    <div class="warning-title">The WOK Rule</div>
+    <div class="warning-text">WOK went from $1.40 entry to $10 before crashing to $1.20. The thesis was right — stock went to $1.20 eventually. But without a hard stop, the intermediate squeeze caused a massive loss. <strong style="color:var(--red)">A correct thesis doesn't prevent losses if the stop isn't honored.</strong></div>
+  </div>
+</div>
+
+<!-- 08 EXIT RULES -->
+<div class="section-divider"><span>08 — Exit Rules & Targets</span></div>
+<div class="card" id="exit">
+  <div class="card-title"><span class="num">08</span> When and How to Exit</div>
+  <div class="scenario-row">
+    <div class="scenario">
+      <div class="scenario-label" style="color:var(--green)">Target 1 — Scale Out</div>
+      <div class="scenario-text">Cover 50% of position at first major support level or prior day's close. Lock in partial profit and let the rest ride.</div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:var(--green)">Target 2 — Full Exit</div>
+      <div class="scenario-text">Cover remaining at next support level, today's open price, or LOD. Don't wait for a full collapse — take the profit.</div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:var(--red)">Stop Hit</div>
+      <div class="scenario-text">Cover immediately, full position. No averaging up on a losing short. Move to the next trade.</div>
+    </div>
+  </div>
+  <ul class="rule-list" style="margin-top:14px">
+    <li><span class="rule-icon">🕐</span><div><strong style="color:var(--text)">3:30 PM hard cut</strong> — Never hold a micro-cap short into the close. Covers at 3:30 PM regardless of P&L. After-hours action on these names is unpredictable.</div></li>
+    <li><span class="rule-icon">🕐</span><div><strong style="color:var(--text)">Expensive borrow = intraday only</strong> — If borrow rate is above 100% APR, this is a same-day trade only. Calculate daily cost before entering.</div></li>
+    <li><span class="rule-icon">🕐</span><div><strong style="color:var(--text)">Trail the stop on winning trades</strong> — Once down 20% from entry, move stop to breakeven. Once down 30%, trail stop to lock in profit.</div></li>
+  </ul>
+</div>
+
+<!-- 09 HALT MANAGEMENT -->
+<div class="section-divider"><span>09 — Halt Management</span></div>
+<div class="card" id="halts">
+  <div class="card-title"><span class="num">09</span> What to Do When a Halt Happens</div>
+  <div class="card-body">
+    <p>LULD (Limit Up-Limit Down) halts on parabolic stocks are common. On stocks moving 100%+ in a day, expect multiple halts. They typically last 5 minutes.</p>
+  </div>
+  <div class="scenario-row" style="margin-top:10px">
+    <div class="scenario">
+      <div class="scenario-label" style="color:var(--red)">Halted against you</div>
+      <div class="scenario-text">Watch bid/ask during halt. If bid is holding above your stop price on resume, EXIT immediately. Don't hope.</div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:var(--green)">Halted in your favor</div>
+      <div class="scenario-text">Trail your stop down. Prepare for a volatile resume. Be ready to cover quickly if it reverses.</div>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:var(--amber)">Not yet in a trade</div>
+      <div class="scenario-text">Wait for resume and first 1–2 candles. Halts often resume with a big directional move — let price discovery happen before entering.</div>
+    </div>
+  </div>
+  <div class="lesson-box" style="margin-top:10px">
+    <div class="lesson-title">RMSG Halt Lesson</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6">RMSG halted with bid at $1.66–$1.80 while short at $1.55. The bid holding elevated during the halt was the signal to exit on resume. Waiting cost an additional $15–$20 loss vs cutting immediately.</div>
+  </div>
+</div>
+
+<!-- 10 STOCKS TO AVOID -->
+<div class="section-divider"><span>10 — Stocks to Avoid Shorting</span></div>
+<div class="card" id="avoid">
+  <div class="card-title"><span class="num">10</span> Never Short These</div>
+  <ul class="rule-list">
+    <li><span class="rule-icon">❌</span><div><strong style="color:var(--text)">Market cap under $5M</strong> — These can go 10x before collapsing. WOK had $292K market cap and went from $1.40 to $10. No borrow available anyway in most cases.</div></li>
+    <li><span class="rule-icon">❌</span><div><strong style="color:var(--text)">Short interest above 25%</strong> — Crowded shorts = massive squeeze potential. UCAR had 27.4% short interest — dangerous. Always check SI before entering.</div></li>
+    <li><span class="rule-icon">❌</span><div><strong style="color:var(--text)">Pre-earnings names</strong> — Any stock with earnings in the next 5 days. A beat sends it up 30%+ against your short. Wait until after the report.</div></li>
+    <li><span class="rule-icon">❌</span><div><strong style="color:var(--text)">Stocks with real catalysts</strong> — Real earnings beats, real FDA approvals, real major contracts. Even if overextended, these can sustain. RCT ($30M deal), RECT (profitable, real contracts), MOBX (AMD partnership).</div></li>
+    <li><span class="rule-icon">❌</span><div><strong style="color:var(--text)">Macro-driven moves</strong> — Oil prices, geopolitical events, Fed decisions. SCO, DLXY moved on macro. Not your edge.</div></li>
+    <li><span class="rule-icon">❌</span><div><strong style="color:var(--text)">Large caps ($500M+)</strong> — XRX, SOUN, META, AMD. Institutional ownership, real fundamentals. Not your setup.</div></li>
+    <li><span class="rule-icon">❌</span><div><strong style="color:var(--text)">Day after a big loss</strong> — Emotional state is compromised. Revenge trading turns one bad day into two. Take the day off.</div></li>
+  </ul>
+</div>
+
+<!-- 11 BORROW GUIDE -->
+<div class="section-divider"><span>11 — Borrow & IBKR Guide</span></div>
+<div class="card" id="borrow">
+  <div class="card-title"><span class="num">11</span> Borrow Availability & Cost</div>
+  <div class="card-body"><p>Always check borrow on IBKR — not TOS. IBKR has the largest retail borrow inventory. Most of the best setups are unavailable on TOS but available on IBKR.</p></div>
+  <table style="margin-top:12px">
+    <tr><th>Borrow Rate (APR)</th><th>Cost on $1K position / day</th><th>Action</th></tr>
+    <tr><td>Under 50%</td><td>Under $1.37</td><td style="color:var(--green)">✅ Trade freely</td></tr>
+    <tr><td>50–150%</td><td>$1.37–$4.11</td><td style="color:var(--green)">✅ Intraday only</td></tr>
+    <tr><td>150–300%</td><td>$4.11–$8.22</td><td style="color:var(--amber)">⚠️ Intraday only, no overnight</td></tr>
+    <tr><td>Over 300%</td><td>Over $8.22</td><td style="color:var(--red)">❌ Reconsider — cost eats profit</td></tr>
+    <tr><td>Not available</td><td>N/A</td><td style="color:var(--red)">❌ No trade. No exceptions.</td></tr>
+  </table>
+  <div class="lesson-box" style="margin-top:10px">
+    <div class="lesson-title">The IBKR Rule</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6">TOS scanner finds the ticker → Check borrow on IBKR first → If available at acceptable rate → Execute on IBKR. This single workflow change would have given you access to AEHL, BIRD, AKAN, SOBR — all missed on TOS.</div>
+  </div>
+</div>
+
+<!-- 12 PSYCHOLOGY -->
+<div class="section-divider"><span>12 — Psychology Rules</span></div>
+<div class="card" id="psychology">
+  <div class="card-title"><span class="num">12</span> Trading Psychology Rules</div>
+  <ul class="rule-list">
+    <li><span class="rule-icon">🧠</span><div><strong style="color:var(--text)">Watch more than you trade</strong> — The best sessions have 0–1 trades. Patience is your edge. Most days the right call is no trade.</div></li>
+    <li><span class="rule-icon">🧠</span><div><strong style="color:var(--text)">Never force a trade</strong> — If it doesn't fit the checklist, it's not a trade. There will always be another setup tomorrow.</div></li>
+    <li><span class="rule-icon">🧠</span><div><strong style="color:var(--text)">No revenge trading</strong> — After a loss, the worst thing you can do is immediately look for a trade to "make it back." Take a break. Come back fresh.</div></li>
+    <li><span class="rule-icon">🧠</span><div><strong style="color:var(--text)">When the answer is "both"</strong> — If you're partly excited about a trade AND partly trying to make back losses, you don't trade. Emotion overrides discipline every time.</div></li>
+    <li><span class="rule-icon">🧠</span><div><strong style="color:var(--text)">Greed kills trades</strong> — WOK was the right thesis at the right time. Greed (not honoring the stop) turned a manageable loss into a big one. Cut when the price says cut, not when your P&L says so.</div></li>
+    <li><span class="rule-icon">🧠</span><div><strong style="color:var(--text)">Capital preservation first</strong> — A day with no trades is better than a day with a big loss. Protect the account. The market is open every day.</div></li>
+    <li><span class="rule-icon">📊</span><div><strong style="color:var(--text)">$3,000 daily loss limit — walk away</strong> — Your data proves this: 21 days with losses over $10K account for 54% of all your losses ($414,824). Hit $3K, close everything, step away. No exceptions.</div></li>
+    <li><span class="rule-icon">📊</span><div><strong style="color:var(--text)">Never trade after 2:00 PM</strong> — Your trade history shows 9AM–2PM is solidly profitable. 3PM–7PM destroyed $1,301,905 in cumulative P&L. You are a morning trader. Stop at 2.</div></li>
+    <li><span class="rule-icon">📊</span><div><strong style="color:var(--text)">Mandatory day off after $3K+ loss</strong> — 27 times in your history a big losing day was directly followed by another losing day. Revenge trading is confirmed in your data. Pause after big losses.</div></li>
+  </ul>
+</div>
+
+<!-- 13 LESSONS LEARNED -->
+<div class="section-divider"><span>13 — Hard Lessons Learned</span></div>
+<div class="card" id="lessons">
+  <div class="card-title"><span class="num">13</span> Real Trades, Real Lessons</div>
+
+  <div class="ticker-example">
+    <strong>RMSG — April 2026</strong> · Shorted at $1.55, halted, exited ~$1.75. Loss: ~$100.<br>
+    <span style="color:var(--amber)">Lesson:</span> Always set stop before entry, not after. Halt resumes on parabolic stocks almost always favor the direction of the move. Plan halt exit in advance.
+  </div>
+
+  <div class="ticker-example" style="margin-top:8px">
+    <strong>BIRD (NewBird AI) — April 2026</strong> · No borrow available on TOS. Missed the short from $7 to $3.<br>
+    <span style="color:var(--amber)">Lesson:</span> Always check IBKR for borrow, not just TOS. IBKR has dramatically larger borrow inventory. TOS saying "unavailable" doesn't mean truly unavailable.
+  </div>
+
+  <div class="ticker-example" style="margin-top:8px">
+    <strong>WOK — May 2026</strong> · Shorted 1,000 shares at $1.40. Stock squeezed to $10 before crashing to $1.20. Big loss.<br>
+    <span style="color:var(--red)">Lesson:</span> Never short stocks with market cap under $5M ($292K market cap). Ultra-thin floats can go 10x before collapsing. 1,000 shares was too large. Stop at $1.70 was not honored. Three rules broken in one trade.
+  </div>
+
+  <div class="ticker-example" style="margin-top:8px">
+    <strong>AEHL — May 2026</strong> · Great thesis, borrow available at nominal rate. Never gave clean HOD rejection entry. Watched it all day, no trade.<br>
+    <span style="color:var(--green)">Lesson:</span> Good discipline — waiting for the entry. Not forcing a trade when price action doesn't confirm. The best trade was no trade.
+  </div>
+
+  <div class="ticker-example" style="margin-top:8px">
+    <strong>RCT, RECT, MOBX — Various 2026</strong> · Correctly identified as having real catalysts and avoided shorting.<br>
+    <span style="color:var(--green)">Lesson:</span> Catalyst quality analysis is working. Avoiding real catalysts is as important as finding weak ones.
+  </div>
+</div>
+
+<!-- 14 DAILY WORKFLOW -->
+<div class="section-divider"><span>14 — Daily Workflow</span></div>
+<div class="card" id="workflow">
+  <div class="card-title"><span class="num">14</span> Daily Trading Routine</div>
+  <ul class="rule-list">
+    <li><span class="rule-icon" style="color:var(--accent)">8:00 AM</span><div><strong style="color:var(--text)">Build premarket watchlist</strong> — Run Scanner 01 (Premarket Parabolic Gapper). For each ticker: paste into Catalyst Analyzer app → check catalyst strength → check borrow on IBKR. Keep top 3–5 names.</div></li>
+    <li><span class="rule-icon" style="color:var(--accent)">9:00 AM</span><div><strong style="color:var(--text)">Confirm borrow and rates</strong> — Check IBKR borrow on your watchlist names. Borrow rates change morning to morning. Confirm availability before open.</div></li>
+    <li><span class="rule-icon" style="color:var(--accent)">9:30 AM</span><div><strong style="color:var(--text)">Watch, don't trade</strong> — Let the first 15–30 minutes play out. Watch for HOD formation, volume profile, halt risk. Run Scanner 02 (VWAP Extension Fade) alongside Scanner 03 (Halt Detector).</div></li>
+    <li><span class="rule-icon" style="color:var(--accent)">9:45–11:30 AM</span><div><strong style="color:var(--text)">Prime short window</strong> — This is when parabolic moves typically exhaust. Look for HOD rejections, lower highs, volume drying up on pushes. Execute pre-trade checklist before any entry.</div></li>
+    <li><span class="rule-icon" style="color:var(--accent)">11:30 AM–2:00 PM</span><div><strong style="color:var(--text)">Lunch lull — be patient</strong> — Volume dries up, moves are choppier. Higher risk of getting whipsawed. Only trade the very clearest setups.</div></li>
+    <li><span class="rule-icon" style="color:var(--accent)">2:00 PM</span><div><strong style="color:var(--text)">HARD STOP — no new positions</strong> — Your trade history shows $1.3M in cumulative losses from the 3–7PM window. 2PM is a hard rule, not a guideline. Close open positions or trail stops.</div></li>
+    <li><span class="rule-icon" style="color:var(--red)">$3,000</span><div><strong style="color:var(--text)">Daily loss limit — walk away immediately</strong> — Hit $3K loss at any point in the day, close everything and step away. Your data shows a $3K daily cap would have made you profitable overall.</div></li>
+    <li><span class="rule-icon" style="color:var(--accent)">3:30 PM</span><div><strong style="color:var(--text)">Cover all positions</strong> — Hard close. No exceptions. After-hours on low float names is unpredictable and dangerous.</div></li>
+    <li><span class="rule-icon" style="color:var(--accent)">After close</span><div><strong style="color:var(--text)">Build tomorrow's watchlist</strong> — Run Daily Scanners 04–09. Flag multi-day runners for tomorrow's fade. Check if any today's names are setting up for a continuation short tomorrow morning.</div></li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

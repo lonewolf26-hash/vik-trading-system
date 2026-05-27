@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vik's TOS Scanner Suite</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0c0f; --surface: #111418; --surface2: #181c22;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0; --muted: #6b7280; --accent: #00d4aa;
+    --red: #ff4757; --amber: #ffa502; --blue: #3b82f6;
+    --mono: 'JetBrains Mono', monospace; --sans: 'DM Sans', sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); padding: 2rem 1rem; font-size: 15px; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid var(--border); }
+  .header-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+  .logo { width: 40px; height: 40px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 14px; font-weight: 700; color: #0a0c0f; }
+  h1 { font-size: 22px; font-weight: 600; }
+  .tagline { font-size: 13px; color: var(--muted); font-family: var(--mono); }
+
+  .toc { background: var(--surface); border: 0.5px solid var(--border2); border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; }
+  .toc-title { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+  .toc-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px; cursor: pointer; text-decoration: none; transition: border-color 0.15s; }
+  .toc-item:hover { border-color: var(--accent); }
+  .toc-num { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 700; min-width: 24px; }
+  .toc-name { font-size: 13px; color: var(--text); }
+  .toc-tag { margin-left: auto; font-size: 10px; font-family: var(--mono); padding: 2px 7px; border-radius: 4px; }
+  .tag-premarket { background: rgba(0,212,170,0.12); color: var(--accent); }
+  .tag-intraday { background: rgba(255,165,2,0.12); color: var(--amber); }
+  .tag-daily { background: rgba(59,130,246,0.12); color: var(--blue); }
+  .tag-chart { background: rgba(255,71,87,0.12); color: var(--red); }
+
+  .section-divider { display: flex; align-items: center; gap: 12px; margin: 2rem 0 1rem; }
+  .section-divider span { font-size: 12px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+  .scanner-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; margin-bottom: 1.25rem; overflow: hidden; }
+  .scanner-header { padding: 1rem 1.25rem; border-bottom: 0.5px solid var(--border); display: flex; align-items: flex-start; gap: 12px; }
+  .scanner-num { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 700; min-width: 32px; padding-top: 1px; }
+  .scanner-info { flex: 1; }
+  .scanner-name { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .scanner-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .scanner-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .meta-pill { font-size: 11px; font-family: var(--mono); padding: 3px 9px; border-radius: 4px; background: var(--surface2); color: var(--muted); border: 0.5px solid var(--border); }
+
+  .scanner-body { padding: 1rem 1.25rem; }
+  .code-label { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .code-block { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px; padding: 1rem; font-family: var(--mono); font-size: 12px; color: var(--text); white-space: pre; overflow-x: auto; line-height: 1.7; margin-bottom: 12px; }
+  .copy-btn { font-size: 12px; padding: 5px 14px; border-radius: 6px; border: 0.5px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; font-family: var(--mono); }
+  .copy-btn:hover { background: var(--surface2); color: var(--text); }
+
+  .setup-box { background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+  .setup-title { font-size: 11px; font-family: var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .setup-steps { list-style: none; counter-reset: steps; }
+  .setup-steps li { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 5px; padding-left: 1.5rem; position: relative; counter-increment: steps; }
+  .setup-steps li::before { content: counter(steps) "."; position: absolute; left: 0; color: var(--accent); font-family: var(--mono); font-size: 12px; font-weight: 700; }
+  .setup-steps li code { font-family: var(--mono); font-size: 11px; background: var(--surface); padding: 1px 5px; border-radius: 3px; color: var(--text); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="header-top">
+    <div class="logo">TOS</div>
+    <div>
+      <h1>Vik's TOS Scanner Suite</h1>
+      <div class="tagline">short-side momentum · low float · parabolic fade</div>
+    </div>
+  </div>
+</header>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <div class="toc-title">All Scanners</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-name">Premarket Parabolic Gapper</span><span class="toc-tag tag-premarket">Premarket</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-name">Intraday VWAP Extension Fade</span><span class="toc-tag tag-intraday">Intraday</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-name">Extreme Volume Spike / Halt Detector</span><span class="toc-tag tag-intraday">Intraday</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-name">Low Float 3-Day Momentum Runner</span><span class="toc-tag tag-daily">Daily</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-name">Low Float Single-Day 20% Rip</span><span class="toc-tag tag-daily">Daily</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-name">Failed Breakout / HOD Rejection</span><span class="toc-tag tag-daily">Daily</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-name">Parabolic Fade / Bearish Reversal</span><span class="toc-tag tag-daily">Daily</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-name">Breakdown Below Support</span><span class="toc-tag tag-daily">Daily</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-name">High Short Interest + Price Weakness</span><span class="toc-tag tag-daily">Daily</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-name">Momentum Breakout + VWAP Alert</span><span class="toc-tag tag-chart">Chart Alert</span></a>
+    <a class="toc-item" href="#s11"><span class="toc-num">11</span><span class="toc-name">ATR-Based R/R Painter</span><span class="toc-tag tag-chart">Chart Study</span></a>
+  </div>
+</div>
+
+<!-- SECTION: PREMARKET -->
+<div class="section-divider"><span>Premarket Scanners — Run 8:00–9:25 AM ET</span></div>
+
+<!-- SCANNER 01 -->
+<div class="scanner-card" id="s1">
+  <div class="scanner-header">
+    <span class="scanner-num">01</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Premarket Parabolic Gapper</div>
+      <div class="scanner-desc">Finds stocks gapping up 50%+ premarket on 5x+ relative volume under $5. Builds your short watchlist before the open. This is how you find RMSG, SNAL, SNYR type setups before 9:30.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: Day</span>
+        <span class="meta-pill">Run: 8:00–9:25 AM ET</span>
+        <span class="meta-pill">Price: $0.50–$5.00</span>
+        <span class="meta-pill">Gap: 50%+</span>
+        <span class="meta-pill">Rel Vol: 5x+</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code01"># 01 — PREMARKET PARABOLIC GAPPER
+# Finds stocks gapping 50%+ premarket on 5x+ relative volume
+# Run: 8:00 AM – 9:25 AM ET | Aggregation: Day
+
+def priorClose = close(period = AggregationPeriod.DAY)[1];
+def price = close;
+def gapPct = (price - priorClose) / priorClose * 100;
+def avgVol = Average(volume, 20);
+def relVol = volume / avgVol;
+
+plot scan = price > 0.50
+        and price < 5.00
+        and gapPct >= 50
+        and relVol >= 5;</div>
+    <button class="copy-btn" onclick="copyCode('code01', this)">Copy</button>
+    <div class="setup-box">
+      <div class="setup-title">Setup in TOS</div>
+      <ol class="setup-steps">
+        <li>Scan tab → <code>Stock Hacker</code></li>
+        <li><code>Add Study Filter</code> → <code>Study</code> → <code>Edit</code> → paste code</li>
+        <li>Set aggregation to <code>Day</code></li>
+        <li>Add UI filter: <code>Last between $0.50–$5.00</code>, <code>Exchange: NASDAQ/NYSE</code></li>
+        <li>Sort results by <code>% Change</code> descending</li>
+        <li>Save tab as <code>"PM Gapper"</code></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: INTRADAY -->
+<div class="section-divider"><span>Intraday Scanners — Run After 9:30 AM ET</span></div>
+
+<!-- SCANNER 02 -->
+<div class="scanner-card" id="s2">
+  <div class="scanner-header">
+    <span class="scanner-num">02</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Intraday VWAP Extension Fade</div>
+      <div class="scanner-desc">Flags stocks trading 30%+ above VWAP with slowing momentum candles. Catches the exhaustion window when a parabolic move is fading and the short entry is setting up.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: 1 min</span>
+        <span class="meta-pill">Run: 9:30–11:30 AM ET</span>
+        <span class="meta-pill">VWAP Extension: 30%+</span>
+        <span class="meta-pill">Rel Vol: 10x+</span>
+        <span class="meta-pill">Momentum Slowing</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code02"># 02 — INTRADAY VWAP EXTENSION FADE
+# Flags stocks 30%+ above VWAP with slowing momentum
+# Run: 9:30 AM – 11:30 AM ET | Aggregation: 1 min
+
+def price = close;
+def vwapVal = VWAP();
+def vwapExt = (price - vwapVal) / vwapVal * 100;
+def avgVol = Average(volume, 20);
+def relVol = volume / avgVol;
+def range = high - low;
+def avgRange = Average(range, 5);
+def momentumSlowing = range < avgRange * 0.70;
+
+plot scan = price > 0.50
+        and price < 5.00
+        and vwapExt >= 30
+        and relVol >= 10
+        and momentumSlowing;</div>
+    <button class="copy-btn" onclick="copyCode('code02', this)">Copy</button>
+    <div class="setup-box">
+      <div class="setup-title">What to look for when triggered</div>
+      <ol class="setup-steps">
+        <li>Red candle rejecting HOD on the 1-min chart</li>
+        <li>Volume drying up on each upside push</li>
+        <li>Lower highs forming — each push weaker than last</li>
+        <li>Price losing VWAP support on a pullback</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNER 03 -->
+<div class="scanner-card" id="s3">
+  <div class="scanner-header">
+    <span class="scanner-num">03</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Extreme Volume Spike / Halt Detector</div>
+      <div class="scanner-desc">Flags stocks with 50x+ average volume — likely halted or just resumed. Gives early warning before RMSG-type situations so you can plan your entry and stop before the chaos hits.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: 1 min</span>
+        <span class="meta-pill">Run: All day</span>
+        <span class="meta-pill">Rel Vol: 50x+</span>
+        <span class="meta-pill">Price: $0.50–$5.00</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code03"># 03 — EXTREME VOLUME SPIKE / HALT DETECTOR
+# Flags stocks 50x+ average volume — halt candidate or resume
+# Run: All day | Aggregation: 1 min
+
+def price = close;
+def avgVol = Average(volume, 20);
+def relVol = volume / avgVol;
+
+plot scan = price > 0.50
+        and price < 5.00
+        and relVol >= 50;</div>
+    <button class="copy-btn" onclick="copyCode('code03', this)">Copy</button>
+    <div class="setup-box">
+      <div class="setup-title">Pre-trade checklist when triggered</div>
+      <ol class="setup-steps">
+        <li>Check borrow availability on IBKR before entering</li>
+        <li>Confirm catalyst is weak — no real news, vague PR</li>
+        <li>Set hard stop immediately at entry — above HOD</li>
+        <li>Plan halt resume exit in advance — up or down</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: DAILY -->
+<div class="section-divider"><span>Daily Scanners — Run After Market Close or Premarket</span></div>
+
+<!-- SCANNER 04 -->
+<div class="scanner-card" id="s4">
+  <div class="scanner-header">
+    <span class="scanner-num">04</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Low Float 3-Day Momentum Runner</div>
+      <div class="scanner-desc">Finds low float stocks under $10 that have risen 50%+ over the last 3 trading days. Surfaces multi-day runners for short fade or continuation plays.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: Day</span>
+        <span class="meta-pill">Float: under 20M</span>
+        <span class="meta-pill">Price: under $10</span>
+        <span class="meta-pill">3-Day Gain: 50%+</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code04"># 04 — LOW FLOAT 3-DAY MOMENTUM RUNNER
+# Float < 20M, Price < $10, risen 50%+ over last 3 trading days
+# Aggregation: Day
+# Add manually: Fundamental filter → Shares Float < 20,000,000
+
+input max_price = 10.00;
+input min_gain_3d = 50.0;
+input rel_vol_min = 1.5;
+input avg_vol_length = 20;
+
+def price_ok = close < max_price and close > 0.20;
+def avg_vol = Average(volume, avg_vol_length);
+def rel_vol = volume / avg_vol;
+def vol_ok = rel_vol >= rel_vol_min;
+def gain_3d = ((close - close[3]) / close[3]) * 100;
+def is_runner = gain_3d >= min_gain_3d;
+
+plot scan = price_ok and vol_ok and is_runner;</div>
+    <button class="copy-btn" onclick="copyCode('code04', this)">Copy</button>
+    <div class="setup-box">
+      <div class="setup-title">Setup in TOS</div>
+      <ol class="setup-steps">
+        <li>Paste script in Stock Hacker as a Study Filter</li>
+        <li>Add Fundamental filter: <code>Shares Float → Less Than → 20,000,000</code></li>
+        <li>Set aggregation to <code>Day</code></li>
+        <li>Save tab as <code>"3-Day Runner"</code></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNER 05 -->
+<div class="scanner-card" id="s5">
+  <div class="scanner-header">
+    <span class="scanner-num">05</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Low Float Single-Day 20% Rip</div>
+      <div class="scanner-desc">Finds low float stocks that had at least one day with a 20%+ gain in the last 5 trading days. Surfaces recent pumps for next-day fade setups.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: Day</span>
+        <span class="meta-pill">Float: under 30M</span>
+        <span class="meta-pill">Price: $0.20–$15</span>
+        <span class="meta-pill">Single-Day Gain: 20%+</span>
+        <span class="meta-pill">Lookback: 5 days</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code05"># 05 — LOW FLOAT SINGLE-DAY 20% RIP
+# Float < 30M, Price $0.20–$15, any 1 day with 20%+ gain in last 5 days
+# Aggregation: Day
+# Add manually: Fundamental filter → Shares Float < 30,000,000
+
+input min_price = 0.20;
+input max_price = 15.00;
+input min_day_gain = 20.0;
+
+def price_ok = close >= min_price and close <= max_price;
+
+def gain_day0 = ((close[0] - close[1]) / close[1]) * 100;
+def gain_day1 = ((close[1] - close[2]) / close[2]) * 100;
+def gain_day2 = ((close[2] - close[3]) / close[3]) * 100;
+def gain_day3 = ((close[3] - close[4]) / close[4]) * 100;
+def gain_day4 = ((close[4] - close[5]) / close[5]) * 100;
+
+def had_big_day =
+    gain_day0 >= min_day_gain or
+    gain_day1 >= min_day_gain or
+    gain_day2 >= min_day_gain or
+    gain_day3 >= min_day_gain or
+    gain_day4 >= min_day_gain;
+
+plot scan = price_ok and had_big_day;</div>
+    <button class="copy-btn" onclick="copyCode('code05', this)">Copy</button>
+    <div class="setup-box">
+      <div class="setup-title">Setup in TOS</div>
+      <ol class="setup-steps">
+        <li>Paste script in Stock Hacker as a Study Filter</li>
+        <li>Add Fundamental filter: <code>Shares Float → Less Than → 30,000,000</code></li>
+        <li>Set aggregation to <code>Day</code></li>
+        <li>Save tab as <code>"Single-Day Rip"</code></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNER 06 -->
+<div class="scanner-card" id="s6">
+  <div class="scanner-header">
+    <span class="scanner-num">06</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Failed Breakout / HOD Rejection</div>
+      <div class="scanner-desc">Finds stocks that tagged a new 10-day high intraday but closed below it — a classic rejection candle. Best short entry signal on parabolic stocks losing momentum at the highs.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: Day</span>
+        <span class="meta-pill">Price: under $15</span>
+        <span class="meta-pill">Rel Vol: 1.5x+</span>
+        <span class="meta-pill">HOD Rejection</span>
+        <span class="meta-pill">Bearish Close</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code06"># 06 — FAILED BREAKOUT / HOD REJECTION
+# Stock tagged 10-day high but closed back below it
+# Bearish close in lower 40% of day's range + high rel vol
+# Aggregation: Day
+
+input max_price = 15.00;
+input lookback_high = 10;
+input rel_vol_min = 1.5;
+input avg_vol_length = 20;
+
+def price_ok = close < max_price;
+def avg_vol = Average(volume, avg_vol_length);
+def rel_vol = volume / avg_vol;
+def vol_ok = rel_vol >= rel_vol_min;
+def resistance = Highest(high[1], lookback_high);
+def tagged_resistance = high >= resistance;
+def closed_below = close < resistance;
+def candle_range = high - low;
+def close_pos = (close - low) / candle_range;
+def bearish_close = candle_range > 0 and close_pos <= 0.40;
+
+plot scan = price_ok and vol_ok and tagged_resistance and closed_below and bearish_close;</div>
+    <button class="copy-btn" onclick="copyCode('code06', this)">Copy</button>
+  </div>
+</div>
+
+<!-- SCANNER 07 -->
+<div class="scanner-card" id="s7">
+  <div class="scanner-header">
+    <span class="scanner-num">07</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Parabolic Fade / Bearish Reversal Candle</div>
+      <div class="scanner-desc">Finds stocks up 50%+ in 3 days that are showing the first bearish reversal candle — red candle with upper wick, extended above the 10-day MA. Best for timing short entries on exhausted runners.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: Day</span>
+        <span class="meta-pill">Price: under $15</span>
+        <span class="meta-pill">3-Day Gain: 50%+</span>
+        <span class="meta-pill">Extended above MA</span>
+        <span class="meta-pill">Bearish Reversal Candle</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code07"># 07 — PARABOLIC FADE / BEARISH REVERSAL CANDLE
+# Up 50%+ in 3 days, extended above MA, red candle with upper wick
+# Best for timing short entries on exhausted runners
+# Aggregation: Day
+
+input max_price = 15.00;
+input parabolic_pct = 50.0;
+input ma_length = 10;
+input ma_ext_pct = 30.0;
+input rel_vol_min = 1.5;
+input avg_vol_length = 20;
+
+def price_ok = close < max_price;
+def avg_vol = Average(volume, avg_vol_length);
+def rel_vol = volume / avg_vol;
+def vol_ok = rel_vol >= rel_vol_min;
+def gain_3d = ((close - close[3]) / close[3]) * 100;
+def is_parabolic = gain_3d >= parabolic_pct;
+def ma = Average(close, ma_length);
+def pct_above_ma = ((close - ma) / ma) * 100;
+def is_extended = pct_above_ma >= ma_ext_pct;
+def is_red = close < open;
+def candle_range = high - low;
+def upper_wick = high - Max(close, open);
+def wick_ratio = if candle_range > 0 then upper_wick / candle_range else 0;
+def bearish_candle = is_red and wick_ratio >= 0.25;
+
+plot scan = price_ok and vol_ok and is_parabolic and is_extended and bearish_candle;</div>
+    <button class="copy-btn" onclick="copyCode('code07', this)">Copy</button>
+  </div>
+</div>
+
+<!-- SCANNER 08 -->
+<div class="scanner-card" id="s8">
+  <div class="scanner-header">
+    <span class="scanner-num">08</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Breakdown Below Support</div>
+      <div class="scanner-desc">Finds stocks breaking below their 10-day support low while below both the 9 and 20 EMA, with a red candle and elevated volume. Confirms a structural breakdown — not just a pullback.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: Day</span>
+        <span class="meta-pill">Price: under $15</span>
+        <span class="meta-pill">Below 9 + 20 EMA</span>
+        <span class="meta-pill">10-Day Support Break</span>
+        <span class="meta-pill">Red Candle</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code08"># 08 — BREAKDOWN BELOW SUPPORT
+# Close below 9 EMA + 20 EMA + 10-day support low
+# Red candle + elevated volume = structural breakdown
+# Aggregation: Day
+
+input max_price = 15.00;
+input fast_ema = 9;
+input slow_ema = 20;
+input support_days = 10;
+input rel_vol_min = 1.5;
+input avg_vol_length = 20;
+
+def price_ok = close < max_price;
+def avg_vol = Average(volume, avg_vol_length);
+def rel_vol = volume / avg_vol;
+def vol_ok = rel_vol >= rel_vol_min;
+def ema9 = ExpAverage(close, fast_ema);
+def ema20 = ExpAverage(close, slow_ema);
+def below_emas = close < ema9 and close < ema20;
+def ema9_down = ema9 < ema9[1];
+def ema20_down = ema20 < ema20[1];
+def emas_falling = ema9_down and ema20_down;
+def support = Lowest(low[1], support_days);
+def breakdown = close < support;
+def red_candle = close < open;
+
+plot scan = price_ok and vol_ok and below_emas and emas_falling and breakdown and red_candle;</div>
+    <button class="copy-btn" onclick="copyCode('code08', this)">Copy</button>
+  </div>
+</div>
+
+<!-- SCANNER 09 -->
+<div class="scanner-card" id="s9">
+  <div class="scanner-header">
+    <span class="scanner-num">09</span>
+    <div class="scanner-info">
+      <div class="scanner-name">High Short Interest + Price Weakness</div>
+      <div class="scanner-desc">Finds stocks in a downtrend (below 20 EMA for 3+ days) making lower highs and lower lows with a weak close. Add a manual short interest filter for maximum effectiveness.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Aggregation: Day</span>
+        <span class="meta-pill">Price: under $15</span>
+        <span class="meta-pill">Below 20 EMA: 3+ days</span>
+        <span class="meta-pill">Lower High + Lower Low</span>
+        <span class="meta-pill">Add: SI% > 20% manually</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste in Stock Hacker</div>
+    <div class="code-block" id="code09"># 09 — HIGH SHORT INTEREST + PRICE WEAKNESS
+# Downtrend: below 20 EMA for 3+ days
+# Lower high + lower low today vs yesterday
+# Weak close in bottom 30% of range + elevated volume
+# Add manually: Fundamental → Short Interest % of Float > 20
+# Aggregation: Day
+
+input max_price = 15.00;
+input ema_length = 20;
+input downtrend_days = 3;
+input rel_vol_min = 1.5;
+input avg_vol_length = 20;
+
+def price_ok = close < max_price;
+def avg_vol = Average(volume, avg_vol_length);
+def rel_vol = volume / avg_vol;
+def vol_ok = rel_vol >= rel_vol_min;
+def ema20 = ExpAverage(close, ema_length);
+def below_ema_d0 = close[0] < ema20[0];
+def below_ema_d1 = close[1] < ema20[1];
+def below_ema_d2 = close[2] < ema20[2];
+def in_downtrend = below_ema_d0 and below_ema_d1 and below_ema_d2;
+def lower_high = high < high[1];
+def lower_low = low < low[1];
+def lower_hl = lower_high and lower_low;
+def candle_range = high - low;
+def close_pos = if candle_range > 0 then (close - low) / candle_range else 0;
+def weak_close = close_pos <= 0.30;
+
+plot scan = price_ok and vol_ok and in_downtrend and lower_hl and weak_close;</div>
+    <button class="copy-btn" onclick="copyCode('code09', this)">Copy</button>
+    <div class="setup-box">
+      <div class="setup-title">Add Short Interest Filter</div>
+      <ol class="setup-steps">
+        <li>After pasting script, click <code>Add Study Filter</code> again</li>
+        <li>Choose <code>Fundamental</code> → <code>Short Interest % of Float</code></li>
+        <li>Set to <code>Greater Than → 20</code></li>
+        <li>This confirms heavy short interest is already pressing the stock</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: CHART STUDIES -->
+<div class="section-divider"><span>Chart Studies — Paste on Chart, Not in Scanner</span></div>
+
+<!-- SCANNER 10 -->
+<div class="scanner-card" id="s10">
+  <div class="scanner-header">
+    <span class="scanner-num">10</span>
+    <div class="scanner-info">
+      <div class="scanner-name">Momentum Breakout + VWAP Alert</div>
+      <div class="scanner-desc">Chart study that fires an alert when a stock crosses above the prior bar high while above VWAP with 2.5x+ relative volume. Paints an arrow on the chart and sounds an alert tone.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Paste on Chart</span>
+        <span class="meta-pill">Charts → Edit Studies</span>
+        <span class="meta-pill">Rel Vol: 2.5x+</span>
+        <span class="meta-pill">Above VWAP</span>
+        <span class="meta-pill">Breakout Candle</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste as Chart Study</div>
+    <div class="code-block" id="code10"># 10 — MOMENTUM BREAKOUT + VWAP ALERT
+# Fires when: price crosses above prior bar high + above VWAP + 2.5x rel vol
+# Paste on chart: Charts → Edit Studies → Create New Study
+# Then: right-click chart → Create Alert → Study Alert
+
+input rvol_threshold = 2.5;
+input lookback = 20;
+
+def avgVol = Average(volume, lookback);
+def relVol = volume / avgVol;
+def vwap = VWAP();
+def priorHigh = High[1];
+
+def breakout = Close crosses above priorHigh;
+def aboveVWAP = Close > vwap;
+def highRelVol = relVol >= rvol_threshold;
+def signal = breakout and aboveVWAP and highRelVol;
+
+plot Alert = signal;
+Alert.SetPaintingStrategy(PaintingStrategy.BOOLEAN_ARROW_UP);
+Alert.SetDefaultColor(Color.CYAN);
+Alert.SetLineWeight(3);
+
+Alert(signal, "Momentum Breakout", Alert.BAR, Sound.Ding);</div>
+    <button class="copy-btn" onclick="copyCode('code10', this)">Copy</button>
+    <div class="setup-box">
+      <div class="setup-title">Wiring the Alert</div>
+      <ol class="setup-steps">
+        <li>Paste as a chart study: <code>Charts → Edit Studies → Create New Study</code></li>
+        <li>Right-click chart → <code>Create Alert</code></li>
+        <li>Alert Type → <code>Study Alert</code> → select this study</li>
+        <li>Condition: <code>Alert is true</code></li>
+        <li>Check <code>Sound</code>, <code>Pop-up</code>, optionally <code>Email/SMS</code></li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNER 11 -->
+<div class="scanner-card" id="s11">
+  <div class="scanner-header">
+    <span class="scanner-num">11</span>
+    <div class="scanner-info">
+      <div class="scanner-name">ATR-Based R/R Painter</div>
+      <div class="scanner-desc">Paints the stop level (1x ATR below entry) and 2:1 target level directly on the chart as dashed lines. Visual reference for risk/reward without manual calculation.</div>
+      <div class="scanner-meta">
+        <span class="meta-pill">Paste on Chart</span>
+        <span class="meta-pill">ATR Period: 14</span>
+        <span class="meta-pill">Stop: 1x ATR below</span>
+        <span class="meta-pill">Target: 2x stop distance</span>
+      </div>
+    </div>
+  </div>
+  <div class="scanner-body">
+    <div class="code-label">ThinkScript — paste as Chart Study</div>
+    <div class="code-block" id="code11"># 11 — ATR-BASED R/R PAINTER
+# Paints stop level and 2:1 target on chart as dashed lines
+# Paste on chart: Charts → Edit Studies → Create New Study
+
+input atr_period = 14;
+input atr_stop_mult = 1.0;   # Stop = 1x ATR below entry
+input rr_ratio = 2.0;         # Target = 2x the stop distance
+
+def atr = ATR(atr_period);
+def stopLevel = Close - (atr * atr_stop_mult);
+def targetLevel = Close + (atr * atr_stop_mult * rr_ratio);
+
+plot StopRef = stopLevel;
+StopRef.SetDefaultColor(Color.RED);
+StopRef.SetStyle(Curve.SHORT_DASH);
+StopRef.SetLineWeight(1);
+
+plot TargetRef = targetLevel;
+TargetRef.SetDefaultColor(Color.GREEN);
+TargetRef.SetStyle(Curve.SHORT_DASH);
+TargetRef.SetLineWeight(1);</div>
+    <button class="copy-btn" onclick="copyCode('code11', this)">Copy</button>
+  </div>
+</div>
+
+<!-- WORKFLOW SUMMARY -->
+<div class="section-divider"><span>Daily Workflow</span></div>
+<div class="scanner-card">
+  <div class="scanner-body">
+    <div class="setup-box" style="background:transparent;border:none;padding:0">
+      <ol class="setup-steps">
+        <li><strong style="color:var(--accent)">8:00 AM</strong> — Run Scanner 01 (Premarket Parabolic Gapper) to build watchlist. Check borrow on IBKR for top names.</li>
+        <li><strong style="color:var(--accent)">9:30 AM</strong> — Switch to Scanner 02 (VWAP Extension Fade) to time short entries on gap-ups from watchlist.</li>
+        <li><strong style="color:var(--accent)">All day</strong> — Keep Scanner 03 (Halt Detector) running in background for new halt candidates.</li>
+        <li><strong style="color:var(--accent)">Pre-trade checklist</strong> — Borrow on IBKR ✓ · Weak catalyst ✓ · Stop set at HOD+15% ✓ · Max 200–500 shares ✓</li>
+        <li><strong style="color:var(--accent)">After close</strong> — Run Scanners 04–09 to build next day's watchlist. Flag multi-day runners for tomorrow's fade.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+function copyCode(id, btn) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
