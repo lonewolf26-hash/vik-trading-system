@@ -531,10 +531,18 @@ async function analyzeTickers() {
 async function analyzeTicker(ticker) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
+  // Use proxy on GitHub Pages, direct API on Claude.ai
+  const isGithubPages = window.location.hostname.includes('github.io');
+  const apiUrl = isGithubPages
+    ? 'https://vik-trading-proxy.vercel.app/api/proxy'
+    : 'https://api.anthropic.com/v1/messages';
+  const headers = isGithubPages
+    ? { 'Content-Type': 'application/json', 'x-api-key': getApiKey() }
+    : { 'Content-Type': 'application/json', 'x-api-key': getApiKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' };
   try {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(apiUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers,
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4000,
